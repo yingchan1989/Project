@@ -48,16 +48,36 @@ def col_pos(grid, col_number, color_id):
     return result
 
 
+def diaga_pos(grid, start_id, color_id):
+    result = []
+    for j in range(board_size):
+        indices = start_id + (board_size - 1) * j
+        if grid[indices] == color_id and indices < board_size * board_size:
+            result.append(indices)
+    return result
+
+def diagb_pos(grid, start_id, color_id):
+    result = []
+    for j in range(board_size):
+        indices = start_id + (board_size + 1) * j
+        if grid[indices] == color_id and indices < board_size * board_size:
+            result.append(indices)
+    return result
+
+
+
 #function to find the maximum length of joint pieces in a given row or column based on diff.
 #if diff is set to 1, then this searches a row
 #if diff is set to board_size then this searches a column
 def find_max_length(array, diff):
     j = 1
-    k = 0
+    k = 1
     beg_id = -1
 
-    for i in range(1,len(array)):
+    if len(array) == 0:
+        k = 0
 
+    for i in range(1,len(array)):
         if array[i]-array[i-1] == diff: #add counter to count how many consecutive items
             j += 1
             if j > k:
@@ -65,13 +85,14 @@ def find_max_length(array, diff):
                 beg_id = array[i - j + 1]
         else:
             j=1 #reset counter
-
+            beg_id = array[i-1]
     max_length = k
-    end_id = beg_id + k - 1
+    end_id = beg_id + (k - 1)*diff
+
     if beg_id == -1:
         end_id = -1
 
-    if len(array) == 1:
+    if len(array) ==1:
         max_length = 1
         beg_id = array[0]
         end_id = array[0]
@@ -108,9 +129,43 @@ def find_adjacent_spaces(col_or_row, grid, board_size, beg_id, end_id):
         if end_id >= board_size*board_size-board_size:
             space_id.append(-1)
         elif grid[end_id + board_size] == 0 and end_id + board_size <= board_size*board_size-1:
-            space_id.append(beg_id + board_size)
+            space_id.append(end_id + board_size)
         else:
             space_id.append(-1)
+
+    if col_or_row == 'diaga':
+
+        if beg_id == 0:
+            space_id.append(-1)
+        elif grid[beg_id - board_size + 1] == 0 and beg_id - board_size + 1 >= 0 and beg_id not in right_border(board_size):
+            space_id.append(beg_id - board_size +1)
+        else:
+            space_id.append(-1)
+
+        if end_id >= board_size*board_size - board_size :
+            space_id.append(-1)
+        elif grid[end_id + board_size - 1] == 0 and end_id not in left_border(board_size):
+            space_id.append(end_id + board_size - 1)
+        else:
+            space_id.append(-1)
+
+    if col_or_row == 'diagb':
+
+        if beg_id == 0:
+            space_id.append(-1)
+        elif grid[beg_id - board_size - 1] == 0 and beg_id - board_size - 1 >= 0 and beg_id not in left_border(board_size):
+            space_id.append(beg_id - board_size - 1)
+        else:
+            space_id.append(-1)
+
+        if end_id >= board_size*board_size - board_size :
+            space_id.append(-1)
+        elif grid[end_id + board_size + 1] == 0 and end_id not in right_border(board_size):
+            space_id.append(end_id + board_size + 1)
+        else:
+            space_id.append(-1)
+
+    #exception handling
     if beg_id == -1:
         space_id[0] = -1
         space_id[1] = -1
@@ -139,7 +194,6 @@ def convert_to_col_status(grid, color_id):
     import numpy as np
     arr = np.empty((0, 6), int)
     for i in range(1,board_size+1):
-        j = i + board_size
         max_length = find_max_length(col_pos(grid, i, color_id), board_size)[0]
         beg_id = find_max_length(col_pos(grid, i, color_id), board_size)[1]
         end_id = find_max_length(col_pos(grid, i, color_id), board_size)[2]
@@ -151,10 +205,67 @@ def convert_to_col_status(grid, color_id):
         arr = np.vstack((arr, array))
     return arr
 
+def convert_to_diaga_status(grid, color_id):
+    #print diagonal a-type status
+    import numpy as np
+    arr = np.empty((0,6), int)
+    for i in range(4, board_size):
+        max_length = find_max_length(diaga_pos(grid, i, color_id), board_size)[0]
+        beg_id = find_max_length(diaga_pos(grid, i, color_id), board_size)[1]
+        end_id = find_max_length(diaga_pos(grid, i, color_id), board_size)[2]
+        left_space = find_adjacent_spaces('diaga', grid, board_size, beg_id, end_id) [0]
+        right_space = find_adjacent_spaces('diaga', grid, board_size, beg_id, end_id) [1]
+        if left_space == -1 and right_space == -1 and max_length != 5: #update the max length to be zero for blocked pieces
+            max_length = 0
+        array = np.array([i, max_length, beg_id, end_id, left_space, right_space])
+        arr = np.vstack((arr, array))
+
+    for i in range(board_size*2 - 1, board_size*board_size - 4*board_size - 1):
+        max_length = find_max_length(diaga_pos(grid, i, color_id), board_size)[0]
+        beg_id = find_max_length(diaga_pos(grid, i, color_id), board_size)[1]
+        end_id = find_max_length(diaga_pos(grid, i, color_id), board_size)[2]
+        left_space = find_adjacent_spaces('diaga', grid, board_size, beg_id, end_id) [0]
+        right_space = find_adjacent_spaces('diaga', grid, board_size, beg_id, end_id) [1]
+        if left_space == -1 and right_space == -1 and max_length != 5: #update the max length to be zero for blocked pieces
+            max_length = 0
+        array = np.array([i, max_length, beg_id, end_id, left_space, right_space])
+        arr = np.vstack((arr, array))
+    return arr
+
+def convert_to_diagb_status(grid, color_id):
+    #print diagonal a-type status
+    import numpy as np
+    arr = np.empty((0,6), int)
+    for i in range(0, board_size - 5 + 1):
+        max_length = find_max_length(diagb_pos(grid, i, color_id), board_size)[0]
+        beg_id = find_max_length(diagb_pos(grid, i, color_id), board_size)[1]
+        end_id = find_max_length(diagb_pos(grid, i, color_id), board_size)[2]
+        left_space = find_adjacent_spaces('diagb', grid, board_size, beg_id, end_id) [0]
+        right_space = find_adjacent_spaces('diagb', grid, board_size, beg_id, end_id) [1]
+        if left_space == -1 and right_space == -1 and max_length != 5: #update the max length to be zero for blocked pieces
+            max_length = 0
+        array = np.array([i, max_length, beg_id, end_id, left_space, right_space])
+        arr = np.vstack((arr, array))
+
+    for i in range(board_size, board_size*board_size - board_size*(5-1)):
+        max_length = find_max_length(diagb_pos(grid, i, color_id), board_size)[0]
+        beg_id = find_max_length(diagb_pos(grid, i, color_id), board_size)[1]
+        end_id = find_max_length(diagb_pos(grid, i, color_id), board_size)[2]
+        left_space = find_adjacent_spaces('diagb', grid, board_size, beg_id, end_id) [0]
+        right_space = find_adjacent_spaces('diagb', grid, board_size, beg_id, end_id) [1]
+        if left_space == -1 and right_space == -1 and max_length != 5: #update the max length to be zero for blocked pieces
+            max_length = 0
+        array = np.array([i, max_length, beg_id, end_id, left_space, right_space])
+        arr = np.vstack((arr, array))
+    return arr
+
+
 def get_state(grid, color_id):
     array_row = convert_to_row_status(grid,color_id)
     array_col = convert_to_col_status(grid,color_id)
-    final_array = np.vstack((array_row, array_col))
+    array_diaga = convert_to_diaga_status(grid,color_id)
+    array_diagb = convert_to_diagb_status(grid,color_id)
+    final_array = np.vstack((array_row, array_col, array_diaga, array_diagb))
     return final_array
 
 
@@ -162,14 +273,23 @@ def get_full_state(grid, color_id):
     if color_id == 1:
         array_row_first = convert_to_row_status(grid,1)
         array_col_first = convert_to_col_status(grid,1)
+        array_diaga_first = convert_to_diaga_status(grid,1)
+        array_diagb_first = convert_to_diagb_status(grid,1)
         array_row_second = convert_to_row_status(grid,-1)
         array_col_second = convert_to_col_status(grid,-1)
+        array_diaga_second = convert_to_diaga_status(grid, -1)
+        array_diagb_second = convert_to_diagb_status(grid, -1)
     else:
         array_row_first = convert_to_row_status(grid, -1)
         array_col_first = convert_to_col_status(grid, -1)
+        array_diaga_first = convert_to_diaga_status(grid, -1)
+        array_diagb_first = convert_to_diagb_status(grid, -1)
         array_row_second = convert_to_row_status(grid, 1)
         array_col_second = convert_to_col_status(grid, 1)
-    final_array = np.vstack((array_row_first, array_col_first, array_row_second, array_col_second))
+        array_diaga_second = convert_to_diaga_status(grid, 1)
+        array_diagb_second = convert_to_diagb_status(grid, 1)
+    final_array = np.vstack((array_row_first, array_col_first, array_diaga_first, array_diagb_first,
+                             array_row_second, array_col_second, array_diaga_second, array_diagb_second))
     return final_array
 
 def getReward(grid, color_id):
@@ -260,7 +380,7 @@ from keras.layers.core import Dense, Dropout, Activation
 from keras.optimizers import RMSprop
 
 model = Sequential()
-model.add(Dense(164, init='lecun_uniform', input_shape=(120,)))
+model.add(Dense(164, init='lecun_uniform', input_shape=(6*board_size*4 + 6*(board_size-4)*4,)))
 model.add(Activation('relu'))
 #model.add(Dropout(0.2)) I'm not using dropout, but maybe you wanna give it a try?
 
@@ -276,7 +396,7 @@ model.compile(loss='mse', optimizer=rms)
 
 #Start machine learning model below
 
-epochs = 100
+epochs = 1000
 gamma = 0.9  #can play around with this variable
 epsilon = 0.3  #can play around with this variable
 
@@ -306,7 +426,7 @@ for i in range(epochs):
 
         state = get_full_state(grid, color_id) #get the state with the perspective of this color id
 
-        qval = model.predict(state.reshape(1,120), batch_size=1)
+        qval = model.predict(state.reshape(1, 6*board_size*4 + 6*(board_size-4)*4), batch_size=1)
         if random.random() < epsilon:  # choose random action
             action = np.random.randint(0, 2)
         else:  # choose best action from Q(s,a) values
@@ -319,7 +439,7 @@ for i in range(epochs):
         #check the reward for this state
         reward = getReward(new_grid, color_id) #MODIFY
         # Get max_Q(S',a)
-        newQ = model.predict(new_state.reshape(1, 120), batch_size=1)
+        newQ = model.predict(new_state.reshape(1, 6*board_size*4 + 6*(board_size-4)*4), batch_size=1)
         maxQ = np.max(newQ)
 
 
@@ -336,7 +456,7 @@ for i in range(epochs):
         print("Game #: %s" % (i,))
 
         #Fit the model using the updated y value for the perspective of player 1
-        model.fit(state.reshape(1, 120), y, batch_size=1, nb_epoch=1, verbose=1)
+        model.fit(state.reshape(1, 6*board_size*4 + 6*(board_size-4)*4), y, batch_size=1, nb_epoch=1, verbose=1)
 
         #Get the new state and grd and print the grid
         state = new_state
@@ -354,12 +474,13 @@ for i in range(epochs):
 
 def predict_next_move(prev_grid, color_id):
     state = get_full_state(prev_grid, color_id)
-    pred_q = model.predict(state.reshape(1, 120), batch_size=1)
+    pred_q = model.predict(state.reshape(1, 6*board_size*4 + 6*(board_size-4)*4), batch_size=1)
 
     action_to_make = np.argmax(pred_q)
     new_grid = make_action(prev_grid, action_to_make, color_id)
 
     return new_grid
 
-new_grid = predict_next_move([0, 0, 1, 0, 0, 0, 0, 1, 0, 0, -1, 1, 1, 1, -1, 0, -1, -1, -1, -1, 0, 0, 0, 0, 0], -1)
+new_grid = predict_next_move([0, 0, 1, 0, 0, 0, 0, 1, 0, 0, -1, 1, 1, 1, -1, 0, -1, -1, -1, -1, 0, 0, 0, 0, 0], 1)
+
 print new_grid
