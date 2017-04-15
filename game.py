@@ -6,11 +6,7 @@ import numpy as np
 
 board_size = 5
 
-grid = [0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0]
+grid = [0]*5*5
 
 #Create left and right border indexes
 def left_border(board_size):
@@ -52,16 +48,18 @@ def diaga_pos(grid, start_id, color_id):
     result = []
     for j in range(board_size):
         indices = start_id + (board_size - 1) * j
-        if grid[indices] == color_id and indices < board_size * board_size:
-            result.append(indices)
+        if indices < board_size * board_size:
+            if grid[indices] == color_id:
+                result.append(indices)
     return result
 
 def diagb_pos(grid, start_id, color_id):
     result = []
     for j in range(board_size):
         indices = start_id + (board_size + 1) * j
-        if grid[indices] == color_id and indices < board_size * board_size:
-            result.append(indices)
+        if indices < board_size * board_size:
+            if grid[indices] == color_id:
+                result.append(indices)
     return result
 
 
@@ -220,7 +218,7 @@ def convert_to_diaga_status(grid, color_id):
         array = np.array([i, max_length, beg_id, end_id, left_space, right_space])
         arr = np.vstack((arr, array))
 
-    for i in range(board_size*2 - 1, board_size*board_size - 4*board_size - 1):
+    for i in range(board_size*2 - 1, board_size*board_size - 4*board_size, board_size):
         max_length = find_max_length(diaga_pos(grid, i, color_id), board_size)[0]
         beg_id = find_max_length(diaga_pos(grid, i, color_id), board_size)[1]
         end_id = find_max_length(diaga_pos(grid, i, color_id), board_size)[2]
@@ -247,7 +245,7 @@ def convert_to_diagb_status(grid, color_id):
         array = np.array([i, max_length, beg_id, end_id, left_space, right_space])
         arr = np.vstack((arr, array))
 
-    for i in range(board_size, board_size*board_size - board_size*(5-1)):
+    for i in range(board_size, board_size*board_size - board_size*(5-1), board_size):
         max_length = find_max_length(diagb_pos(grid, i, color_id), board_size)[0]
         beg_id = find_max_length(diagb_pos(grid, i, color_id), board_size)[1]
         end_id = find_max_length(diagb_pos(grid, i, color_id), board_size)[2]
@@ -292,6 +290,8 @@ def get_full_state(grid, color_id):
                              array_row_second, array_col_second, array_diaga_second, array_diagb_second))
     return final_array
 
+print get_state(grid, 1)
+print get_state(grid, 1).shape
 def getReward(grid, color_id):
     reward = 0
     if color_id == 1:
@@ -380,7 +380,7 @@ from keras.layers.core import Dense, Dropout, Activation
 from keras.optimizers import RMSprop
 
 model = Sequential()
-model.add(Dense(164, init='lecun_uniform', input_shape=(6*board_size*4 + 6*(board_size-4)*4,)))
+model.add(Dense(164, init='lecun_uniform', input_shape=(6*(board_size + board_size)*2 + 6*(board_size-4+board_size-5)*2*2,)))
 model.add(Activation('relu'))
 #model.add(Dropout(0.2)) I'm not using dropout, but maybe you wanna give it a try?
 
@@ -404,11 +404,7 @@ import random
 
 
 for i in range(epochs):
-    grid = [0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0]
+    grid = [0]*5*5
 
     j = 0 #odd and even counter for players 1 and -1
     status = 1
@@ -425,8 +421,8 @@ for i in range(epochs):
             color_id = -1
 
         state = get_full_state(grid, color_id) #get the state with the perspective of this color id
-
-        qval = model.predict(state.reshape(1, 6*board_size*4 + 6*(board_size-4)*4), batch_size=1)
+        print state.shape
+        qval = model.predict(state.reshape(1, 6*(board_size + board_size)*2 + 6*(board_size-4+board_size-5)*2*2), batch_size=1)
         if random.random() < epsilon:  # choose random action
             action = np.random.randint(0, 2)
         else:  # choose best action from Q(s,a) values
@@ -439,7 +435,7 @@ for i in range(epochs):
         #check the reward for this state
         reward = getReward(new_grid, color_id) #MODIFY
         # Get max_Q(S',a)
-        newQ = model.predict(new_state.reshape(1, 6*board_size*4 + 6*(board_size-4)*4), batch_size=1)
+        newQ = model.predict(new_state.reshape(1, 6*(board_size + board_size)*2 + 6*(board_size-4+board_size-5)*2*2), batch_size=1)
         maxQ = np.max(newQ)
 
 
@@ -456,7 +452,7 @@ for i in range(epochs):
         print("Game #: %s" % (i,))
 
         #Fit the model using the updated y value for the perspective of player 1
-        model.fit(state.reshape(1, 6*board_size*4 + 6*(board_size-4)*4), y, batch_size=1, nb_epoch=1, verbose=1)
+        model.fit(state.reshape(1, 6*(board_size + board_size)*2 + 6*(board_size-4+board_size-5)*2*2), y, batch_size=1, nb_epoch=1, verbose=1)
 
         #Get the new state and grd and print the grid
         state = new_state
@@ -474,13 +470,10 @@ for i in range(epochs):
 
 def predict_next_move(prev_grid, color_id):
     state = get_full_state(prev_grid, color_id)
-    pred_q = model.predict(state.reshape(1, 6*board_size*4 + 6*(board_size-4)*4), batch_size=1)
+    pred_q = model.predict(state.reshape(1, 6*(board_size + board_size)*2 + 6*(board_size-4+board_size-5)*2*2), batch_size=1)
 
     action_to_make = np.argmax(pred_q)
     new_grid = make_action(prev_grid, action_to_make, color_id)
 
     return new_grid
 
-new_grid = predict_next_move([0, 0, 1, 0, 0, 0, 0, 1, 0, 0, -1, 1, 1, 1, -1, 0, -1, -1, -1, -1, 0, 0, 0, 0, 0], 1)
-
-print new_grid
