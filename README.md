@@ -12,6 +12,8 @@ The algorithms also explore various methods of training the reinforcement learni
 2. Random action player that selects a random action per defined in the policy network
 3. Self play where the board game is switched around and the algorithm plays with itself to train
 
+In addition to progressive training, an epsilon-greey algorithm is put in place whereby the epsilon value will decline over time, favoring trained networks for predicted actions. The epsilon declines linearly. 
+
 ## Feature engineering
 The first two algorithms utilize traditonal neural networks and hence feature enginneering was used extensively to summarize the board game states.
 
@@ -22,3 +24,9 @@ Feature engineering items included extracting the columns, rows and diagonals, t
 
 
 ## Reward state space
+A win is typically awarded an arbitary 1000 points, while a loss is awarded -1000. A tweak to the reward was put in place when the player is to play by itself, since if the board game is switched around, and the player plays the winning move, the move prior that caused this winning move is never punished. Hence the punishment occurs when the player fails to block an available space with 4 pieces lined up.
+
+Two reward functions were tested in this project:
+1. A win is rewarded with 1000 points, and a loss is -1000. A draw is given 10.
+2. A win is rewarded with 1000 points, and a loss is -1000. A draw is however given 0.
+
