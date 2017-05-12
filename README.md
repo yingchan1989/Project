@@ -18,7 +18,11 @@ In addition to progressive training, an epsilon-greedy algorithm is put in place
 ## Feature engineering
 The first two algorithms utilize traditonal neural networks and hence feature enginneering was used extensively to summarize the board game states.
 
-Feature engineering items included extracting the columns, rows and diagonals, that house any placement of stones of the current player as well as the opponent player. The maximum number of consecutive placement of stones (both the current player and the opposing player)
+Feature engineering items include:
+1. Number of consecutively placed stones horizontally, vertically or diagonally of the current player and the opposing player
+2. Left and right available spaces of consecutively placed stones
+
+The game state space (for the first two flavors of the algorithms) are flipped when the game is self-played, allowing for features of the opposing player to remain the same. Feature engineering is currently not used for CNN.
 
 ## Action state space
 The action state space differs for each of the algorithm flavors and can be tailored. 
@@ -35,4 +39,8 @@ Two reward functions were tested in this project:
 
 
 ## Performance and results
+
+
+## Extensibility
+The algorithm is extensible to any sized game board state. The A working prototype for the 19x19 model currently powers the browser extension to play Gomoku on BoardGameArena.com. 
 
