@@ -42,5 +42,5 @@ Two reward functions were tested in this project:
 
 
 ## Extensibility
-The algorithm is extensible to any sized game board state. The A working prototype for the 19x19 model currently powers the browser extension to play Gomoku on BoardGameArena.com. 
+The algorithm is extensible to any sized game board. The code is tested using a 5x5 board game with the requirement of five-in-a-row to win. A working prototype for the 19x19 board game currently powers the browser extension to play Gomoku on BoardGameArena.com. A link to download this plugin is currently available here: 
 
