@@ -53,7 +53,7 @@ The game.py model produced the following results (Benchmark1/Benchmark2):
 | Loss | 9 | 41 |
 | Draw | 10 | 38 |
 
-Game.py showed exceptional performance when pitched against benchmark 1, but this is expected since a lot of the policy network was coded. However, when done against benchmark 2, it showed that a lot of the performance derived from the hard coded policy network versus the neural network. Furthermore, results showed that when the model is trained against itself, draws are created exceptionally often during the training rounds, hence it appears to hve learnt how to draw versus winning. 
+Game.py showed exceptional performance when pitched against benchmark 1, but this is expected since a lot of the policy network was coded. However, when done against benchmark 2, it showed that a lot of the performance derived from the hard coded policy network versus the neural network. Furthermore, results showed that when the model is trained against itself, draws are created exceptionally often during the training rounds, hence it appears to have learnt how to draw versus winning. 
 
 The multi-action.py model produced the following results (Benchmark1/Benchmark2):
 
@@ -64,7 +64,7 @@ The multi-action.py model produced the following results (Benchmark1/Benchmark2)
 | Loss | 11 | 8 |
 | Draw | 58 | 56 |
 
-When the hardcoding of policy networks were removed in the multi-action.py model, the results improved. It can be demonstrated that the neural network was able to start cpaturing the key strategy of winning even against a random-action player. It was able to manage a better than 4-to-1 win/loss ratio. It is useful to note that draws occur often, and it is expected as this is done on a 5x5 grid, with a winning criteria of 5-in-a-row, meaning that any piece placed on the row (when placed on a row, it will also be placed on a column), that row and column cannot be won.
+When the hardcoding of policy networks were removed in the multi-action.py model, the results improved. It can be demonstrated that the neural network was able to start capturing the key strategy of winning even against a random-action player. It was able to manage a better than 4-to-1 win/loss ratio. It is useful to note that draws occur often, and it is expected as this is done on a 5x5 grid, with a winning criteria of 5-in-a-row, meaning that any piece placed on the row (when placed on a row, it will also be placed on a column), that row and column cannot be won.
 
 ## Extensibility
 The algorithm is extensible to any sized game board. The code is tested using a 5x5 board game with the requirement of five-in-a-row to win. A working prototype for the 19x19 board game currently powers the browser extension to play Gomoku on BoardGameArena.com. A link to download this plugin is currently available here: 
