@@ -39,7 +39,23 @@ Two reward functions were tested in this project:
 
 
 ## Performance and results
+Each model is benchmarked against two standards to determine their performance.
+1. Random player which plays on a random space
+2. Random action player which plays a random action (where the action is determined by the model). 
 
+The performance test is done on a 5x5 grid, and is performed after training for 1000 games. 100 games is played against each benchmark and the results tallied.
+
+The game.py model produced the following results (Benchmark1/Benchmark2):
+Wins: 81 / 21
+Loss: 9  / 41
+Draw: 10 / 38
+
+The multi-action.py model produced the following results (Benchmark1/Benchmark2):
+Wins: 31 / 36
+Loss: 11 / 8
+Draw: 58 / 56
+
+Note that this game is a 5x5 game board, and 5 are required to win, hence draws are very typical. However, multi-action.py was able to manage a better than a 4-to-1 win-to-loss ratio. 
 
 ## Extensibility
 The algorithm is extensible to any sized game board. The code is tested using a 5x5 board game with the requirement of five-in-a-row to win. A working prototype for the 19x19 board game currently powers the browser extension to play Gomoku on BoardGameArena.com. A link to download this plugin is currently available here: 
